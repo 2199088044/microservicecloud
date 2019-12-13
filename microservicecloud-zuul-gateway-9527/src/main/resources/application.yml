@@ -1,0 +1,39 @@
+server:
+  port: 9527
+
+spring:
+  application:
+    name: microservicecloud-zuul-gateway
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka,http://eureka7002.com:7002/eureka,http://eureka7003.com:7003/eureka
+  instance:
+    instance-id: gateway-9527.com
+    prefer-ip-address: true
+
+#对于这里ignored-services的理解,弹幕给出了另一种理解方式
+# 1. 如有一个服务名是microservicecloud-dept。zuul有默认路由规则，会默认以/microservicecloud-dept/** 作为访问path
+# 2. 所以视频这里才会出现，明明在routes中配置了另外一个path。但是原来的/microservicecloud-dept/仍然能用。
+# 3. 这里老师说，用ignore-services：可以去掉(ignore)这个。实际上，虽然效果是达到了，但是实际意义不一致,
+# 4. ignore-services的实际意义是: 设置一个服务名匹配表达式来定义,不自动创建路由的规则
+# 5. 也就是说zuul虽有路由规则,但用ignored-services配置后,忽略了microservicecloud-dept,不为这个服务启用默认路由规则
+# 6. 这才是ignored-services的理解方式: 不为指定的服务启用默认路由规则,要用自己配置的映射规则(routes)去配置
+
+
+zuul:
+  # 只能用routes中的映射规则访问微服务,不可以再用 microservicecloud-dept 访问
+  # ignored-services: microservicecloud-dept
+  ignored-services: "*"
+  prefix: /atguigu # 访问path的公共前缀
+  routes:
+    mydept.serviceId: microservicecloud-dept
+    mydept.path: /mydept/**
+
+# 开启prefer-ip-address: true后,点击实例名(超链接)打开的页面的信息
+info:
+  app.name: atguigu-microcloud
+  company.name: www.atguigu.com
+  build.artifactId: ${project.artifactId}
+  build.version: ${project.version}
